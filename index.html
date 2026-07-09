@@ -113,13 +113,12 @@ const SECTIONS=[
   {name:"Liquor",priced:true,items:["Vodka","Gin","Rum","Tequila","Bourbon","Rye","Cordial","Martini","Mocktail","Misc"]},
   {name:"Wine",priced:true,items:["White Wine","Red Wine","Sparkling Wine"]},
   {name:"Beer",priced:true,items:["Domestic Beer","Imported Beer"]},
-  {name:"Mixers",priced:false,items:["Fever Tree Tonic","Fever Tree Club Soda","Ginger Beer","Red Bull"]}
+  {name:"Mixers",priced:false,items:["Fever Tree Tonic","Fever Tree Club Soda","Ginger Beer","Red Bull","Soda","Bottled Water"]}
 ];
 const KEY="liquorConsignTracker_v1";
 const $=id=>document.getElementById(id);
 const list=$("list");
 const qtyOf={}; // "Section|Item" -> input element
-
 SECTIONS.forEach(sec=>{
   const wrap=document.createElement("div");wrap.className="cat";
   wrap.innerHTML='<h2>'+sec.name+(sec.priced?'':' <span class="note">counted, not charged</span>')+'</h2>';
@@ -147,11 +146,9 @@ SECTIONS.forEach(sec=>{
   wrap.appendChild(sub);
   list.appendChild(wrap);
 });
-
 const tierName=()=>({10:"Well",14:"Premium",20:"Top Shelf"})[$("fTier").value];
 const price=()=>parseInt($("fTier").value);
 const money=n=>"$"+n.toLocaleString("en-US");
-
 function refresh(){
   const p=price();
   let grandQty=0,grandAmt=0;
@@ -172,7 +169,6 @@ function refresh(){
   $("tAmt").textContent=money(grandAmt);
   $("tierNote").textContent=money(p)+" per drink";
 }
-
 const FIELDS=["fEvent","fDate","fBeo","fPrep","fTier","fNotes"];
 function save(){
   const data={fields:{},qty:{}};
@@ -191,7 +187,6 @@ function load(){
   refresh();
 }
 FIELDS.forEach(f=>$(f).addEventListener("input",()=>{refresh();save();}));
-
 function fmtDate(){
   const v=$("fDate").value;
   if(!v)return new Date().toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric",year:"numeric"});
@@ -200,7 +195,6 @@ function fmtDate(){
 }
 const stamp=()=>new Date().toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-
 function collect(){
   const p=price();
   const out={sections:[],grandQty:0,grandAmt:0};
@@ -217,7 +211,6 @@ function collect(){
   });
   return out;
 }
-
 function buildPlain(c){
   const L=[];
   L.push("BANQUET LIQUOR CONSIGNMENT");
@@ -240,7 +233,6 @@ function buildPlain(c){
   L.push("");L.push("Confidential — For Internal Use Only");
   return L.join("\n");
 }
-
 function buildHTML(c){
   let h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111;">';
   h+='<p style="margin:0 0 2px;font-size:16px;font-weight:bold;">Banquet Liquor Consignment</p>';
@@ -261,7 +253,6 @@ function buildHTML(c){
   h+='<p style="font-size:11px;color:#888;">Confidential — For Internal Use Only</p></div>';
   return h;
 }
-
 function showToast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
 async function copyBoth(html,plain){
   try{
