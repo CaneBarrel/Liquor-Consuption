@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banquet Liquor Consignment Tracker</title>
+<style>
+:root{
+  --bg:#15090d;--card:#241318;--card2:#2e181f;--line:#43242e;
+  --accent:#a83250;--accent2:#d4547a;--accent-soft:#7c2540;
+  --text:#f2e8ea;--muted:#b0949c;--ok:#3fae6a;--warn:#e0b04a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding-bottom:130px;}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#1b0c11,#1b0c11f2);border-bottom:1px solid var(--line);padding:14px 16px 12px;backdrop-filter:blur(6px);}
+h1{margin:0;font-size:18px;letter-spacing:.3px;}
+h1 span{color:var(--accent2);}
+.sub{color:var(--muted);font-size:12px;margin-top:3px;}
+main{max-width:720px;margin:0 auto;padding:10px 12px;}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px;}
+.panel h3{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fgrid .full{grid-column:1/-1;}
+label.fl{display:block;font-size:11px;color:var(--muted);margin:0 0 3px 2px;text-transform:uppercase;letter-spacing:.5px;}
+input.f,select.f,textarea.f{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-size:15px;font-family:inherit;}
+textarea.f{resize:vertical;min-height:56px;}
+select.f{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%23d4547a' stroke-width='2' fill='none'/></svg>");background-repeat:no-repeat;background-position:right 12px center;}
+.tierprice{font-size:13px;color:var(--accent2);font-weight:700;margin-top:6px;text-align:right;}
+.cat{margin-top:18px;}
+.cat h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin:0 0 8px 4px;border-bottom:1px solid var(--line);padding-bottom:6px;display:flex;justify-content:space-between;}
+.cat h2 .note{color:var(--muted);letter-spacing:0;text-transform:none;font-weight:400;}
+.row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;transition:border-color .15s,background .15s;}
+.row.on{border-color:var(--accent);background:var(--card2);}
+.name{flex:1;min-width:0;font-size:15px;font-weight:600;}
+.linetotal{flex:0 0 auto;font-size:13px;color:var(--accent2);font-weight:600;min-width:52px;text-align:right;}
+.stepper{flex:0 0 auto;display:flex;align-items:center;gap:6px;}
+.stepbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--accent2);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.stepbtn:active{background:var(--accent-soft);color:#fff;}
+.qty{width:52px;background:var(--bg);border:1px solid var(--line);color:var(--text);text-align:center;padding:9px 4px;border-radius:10px;font-size:16px;font-weight:600;}
+.row.on .qty{border-color:var(--accent);}
+.subrow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding:4px 6px 0;font-weight:600;}
+.subrow b{color:var(--text);}
+.totals{position:fixed;bottom:66px;left:0;right:0;z-index:19;pointer-events:none;}
+.totals .inner{max-width:720px;margin:0 auto;padding:0 12px;}
+.totalbar{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;box-shadow:0 4px 16px #0008;}
+.totalbar .amt{font-size:17px;color:#fff;}
+footer{position:fixed;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(0deg,#15090d,#15090df2);border-top:1px solid var(--line);padding:10px 16px 14px;}
+.finner{max-width:720px;margin:0 auto;display:flex;gap:10px;}
+button.act{border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.copy{flex:1;background:var(--accent);color:#fff;}
+.copy:active{background:var(--accent2);}
+.clear{flex:0 0 auto;background:var(--card);color:var(--muted);border:1px solid var(--line);padding:14px 18px;}
+.toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#fff;padding:12px 20px;border-radius:30px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 6px 20px #0008;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+dialog{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:0;width:92%;max-width:560px;}
+dialog::backdrop{background:#000a;}
+.dlgh{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.dlgh b{font-size:15px;}
+#outView{max-height:50vh;overflow:auto;background:#fff;margin:0;padding:14px;}
+.dlgf{padding:12px 16px;display:flex;gap:8px;border-top:1px solid var(--line);}
+.dlgf .act{flex:1;padding:13px 8px;font-size:14px;}
+.x{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;}
+.conf{text-align:center;color:var(--muted);font-size:11px;margin:22px 0 8px;letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Banquet <span>Liquor</span> Consignment Tracker</h1>
+  <div class="sub">Count each drink consumed. Totals price automatically by package tier.</div>
+</header>
+<main>
+  <div class="panel">
+    <h3>Event Details</h3>
+    <div class="fgrid">
+      <div class="full"><label class="fl" for="fEvent">Event Name</label><input class="f" id="fEvent" autocomplete="off"></div>
+      <div><label class="fl" for="fDate">Date</label><input class="f" id="fDate" type="date"></div>
+      <div><label class="fl" for="fBeo">BEO Number</label><input class="f" id="fBeo" inputmode="numeric" autocomplete="off"></div>
+      <div class="full"><label class="fl" for="fPrep">Prepared By</label><input class="f" id="fPrep" autocomplete="off"></div>
+      <div class="full">
+        <label class="fl" for="fTier">Package Tier</label>
+        <select class="f" id="fTier">
+          <option value="10">Well — $10 / drink</option>
+          <option value="14">Premium — $14 / drink</option>
+          <option value="20" selected>Top Shelf — $20 / drink</option>
+        </select>
+        <div class="tierprice" id="tierNote">$20 per drink</div>
+      </div>
+      <div class="full"><label class="fl" for="fNotes">Notes</label><textarea class="f" id="fNotes" placeholder="Optional comments…"></textarea></div>
+    </div>
+  </div>
+  <div id="list"></div>
+  <div class="conf">Confidential — For Internal Use Only</div>
+</main>
+<div class="totals"><div class="inner">
+  <div class="totalbar"><span id="tQty">0 drinks</span><span class="amt" id="tAmt">$0</span></div>
+</div></div>
+<footer><div class="finner">
+  <button class="act clear" id="resetBtn">Reset</button>
+  <button class="act copy" id="copyBtn">Copy Results</button>
+</div></footer>
+<div class="toast" id="toast">Copied ✓</div>
+<dialog id="dlg">
+  <div class="dlgh"><b>Consumption Summary</b><button class="x" id="dlgX">&times;</button></div>
+  <div id="outView"></div>
+  <div class="dlgf">
+    <button class="act clear" id="dlgClose">Close</button>
+    <button class="act clear" id="dlgCopyText">Copy for Text</button>
+    <button class="act copy" id="dlgCopyEmail">Copy for Email</button>
+  </div>
+</dialog>
+<script>
+const SECTIONS=[
+  {name:"Liquor",priced:true,items:["Vodka","Gin","Rum","Tequila","Bourbon","Rye","Cordial","Martini","Mocktail","Misc"]},
+  {name:"Wine",priced:true,items:["White Wine","Red Wine","Sparkling Wine"]},
+  {name:"Beer",priced:true,items:["Domestic Beer","Imported Beer"]},
+  {name:"Mixers",priced:false,items:["Fever Tree Tonic","Fever Tree Club Soda","Ginger Beer","Red Bull"]}
+];
+const KEY="liquorConsignTracker_v1";
+const $=id=>document.getElementById(id);
+const list=$("list");
+const qtyOf={}; // "Section|Item" -> input element
+
+SECTIONS.forEach(sec=>{
+  const wrap=document.createElement("div");wrap.className="cat";
+  wrap.innerHTML='<h2>'+sec.name+(sec.priced?'':' <span class="note">counted, not charged</span>')+'</h2>';
+  sec.items.forEach(item=>{
+    const row=document.createElement("div");row.className="row";
+    row.innerHTML=
+      '<div class="name">'+item+'</div>'+
+      (sec.priced?'<div class="linetotal">—</div>':'')+
+      '<div class="stepper">'+
+        '<button class="stepbtn" data-d="-1" aria-label="minus">−</button>'+
+        '<input class="qty" type="number" min="0" inputmode="numeric" value="0">'+
+        '<button class="stepbtn" data-d="1" aria-label="plus">+</button>'+
+      '</div>';
+    const inp=row.querySelector(".qty");
+    qtyOf[sec.name+"|"+item]={inp,row,sec,item};
+    row.querySelectorAll(".stepbtn").forEach(b=>b.addEventListener("click",()=>{
+      inp.value=Math.max(0,(parseInt(inp.value)||0)+parseInt(b.dataset.d));
+      refresh();save();
+    }));
+    inp.addEventListener("input",()=>{refresh();save();});
+    wrap.appendChild(row);
+  });
+  const sub=document.createElement("div");sub.className="subrow";
+  sub.innerHTML='<span>'+sec.name+' Subtotal</span><b data-sub="'+sec.name+'">0'+(sec.priced?' · $0':'')+'</b>';
+  wrap.appendChild(sub);
+  list.appendChild(wrap);
+});
+
+const tierName=()=>({10:"Well",14:"Premium",20:"Top Shelf"})[$("fTier").value];
+const price=()=>parseInt($("fTier").value);
+const money=n=>"$"+n.toLocaleString("en-US");
+
+function refresh(){
+  const p=price();
+  let grandQty=0,grandAmt=0;
+  SECTIONS.forEach(sec=>{
+    let q=0;
+    sec.items.forEach(item=>{
+      const o=qtyOf[sec.name+"|"+item];
+      const v=Math.max(0,parseInt(o.inp.value)||0);
+      q+=v;
+      o.row.classList.toggle("on",v>0);
+      if(sec.priced){o.row.querySelector(".linetotal").textContent=v>0?money(v*p):"—";}
+    });
+    const amt=sec.priced?q*p:0;
+    grandQty+=q;if(sec.priced)grandAmt+=amt;
+    document.querySelector('[data-sub="'+sec.name+'"]').textContent=q+(sec.priced?" · "+money(amt):"");
+  });
+  $("tQty").textContent=grandQty+(grandQty===1?" drink":" drinks");
+  $("tAmt").textContent=money(grandAmt);
+  $("tierNote").textContent=money(p)+" per drink";
+}
+
+const FIELDS=["fEvent","fDate","fBeo","fPrep","fTier","fNotes"];
+function save(){
+  const data={fields:{},qty:{}};
+  FIELDS.forEach(f=>data.fields[f]=$(f).value);
+  Object.keys(qtyOf).forEach(k=>{const v=parseInt(qtyOf[k].inp.value)||0;if(v>0)data.qty[k]=v;});
+  try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}
+}
+function load(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+  if(d){
+    FIELDS.forEach(f=>{if(d.fields&&d.fields[f]!==undefined)$(f).value=d.fields[f];});
+    Object.keys(d.qty||{}).forEach(k=>{if(qtyOf[k])qtyOf[k].inp.value=d.qty[k];});
+  }
+  if(!$("fDate").value){$("fDate").value=new Date().toISOString().slice(0,10);}
+  refresh();
+}
+FIELDS.forEach(f=>$(f).addEventListener("input",()=>{refresh();save();}));
+
+function fmtDate(){
+  const v=$("fDate").value;
+  if(!v)return new Date().toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric",year:"numeric"});
+  const[y,m,dd]=v.split("-").map(Number);
+  return new Date(y,m-1,dd).toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric",year:"numeric"});
+}
+const stamp=()=>new Date().toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function collect(){
+  const p=price();
+  const out={sections:[],grandQty:0,grandAmt:0};
+  SECTIONS.forEach(sec=>{
+    const rows=[];let q=0;
+    sec.items.forEach(item=>{
+      const v=Math.max(0,parseInt(qtyOf[sec.name+"|"+item].inp.value)||0);
+      if(v>0){rows.push({item,qty:v,amt:sec.priced?v*p:null});q+=v;}
+    });
+    if(rows.length){
+      out.sections.push({name:sec.name,priced:sec.priced,rows,qty:q,amt:sec.priced?q*p:null});
+      out.grandQty+=q;if(sec.priced)out.grandAmt+=q*p;
+    }
+  });
+  return out;
+}
+
+function buildPlain(c){
+  const L=[];
+  L.push("BANQUET LIQUOR CONSIGNMENT");
+  L.push("Event: "+($("fEvent").value||"—"));
+  L.push("Date: "+fmtDate());
+  L.push("BEO #: "+($("fBeo").value||"—"));
+  L.push("Prepared by: "+($("fPrep").value||"—"));
+  L.push("Package: "+tierName()+" ("+money(price())+"/drink)");
+  L.push("Sent: "+stamp());
+  L.push("");
+  c.sections.forEach(s=>{
+    L.push("— "+s.name.toUpperCase()+(s.priced?"":" (not charged)")+" —");
+    s.rows.forEach(r=>L.push(r.qty+"  "+r.item+(r.amt!==null?" — "+money(r.amt):"")));
+    L.push("Subtotal: "+s.qty+(s.amt!==null?" — "+money(s.amt):""));
+    L.push("");
+  });
+  L.push("GRAND TOTAL: "+c.grandQty+" drinks — "+money(c.grandAmt));
+  const notes=$("fNotes").value.trim();
+  if(notes){L.push("");L.push("Notes: "+notes);}
+  L.push("");L.push("Confidential — For Internal Use Only");
+  return L.join("\n");
+}
+
+function buildHTML(c){
+  let h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111;">';
+  h+='<p style="margin:0 0 2px;font-size:16px;font-weight:bold;">Banquet Liquor Consignment</p>';
+  h+='<p style="margin:0 0 10px;font-size:12px;color:#555;">'+esc($("fEvent").value||"—")+' &nbsp;·&nbsp; '+esc(fmtDate())+' &nbsp;·&nbsp; BEO '+esc($("fBeo").value||"—")+'<br>Prepared by '+esc($("fPrep").value||"—")+' &nbsp;·&nbsp; '+esc(tierName())+' ('+money(price())+'/drink) &nbsp;·&nbsp; Sent '+esc(stamp())+'</p>';
+  h+='<table cellspacing="0" cellpadding="6" style="border-collapse:collapse;font-size:13px;">';
+  c.sections.forEach(s=>{
+    h+='<tr><td colspan="3" style="background:#a83250;color:#fff;font-weight:bold;padding:6px 8px;border:1px solid #8c2942;">'+esc(s.name)+(s.priced?'':' (not charged)')+'</td></tr>';
+    h+='<tr style="background:#f0f0f0;"><td style="border:1px solid #ccc;font-weight:bold;">Qty</td><td style="border:1px solid #ccc;font-weight:bold;">Item</td><td style="border:1px solid #ccc;font-weight:bold;">Total</td></tr>';
+    s.rows.forEach(r=>{
+      h+='<tr><td style="border:1px solid #ccc;text-align:center;font-weight:bold;">'+r.qty+'</td><td style="border:1px solid #ccc;">'+esc(r.item)+'</td><td style="border:1px solid #ccc;text-align:right;">'+(r.amt!==null?money(r.amt):"—")+'</td></tr>';
+    });
+    h+='<tr><td style="border:1px solid #ccc;text-align:center;font-weight:bold;background:#fafafa;">'+s.qty+'</td><td style="border:1px solid #ccc;font-weight:bold;background:#fafafa;">'+esc(s.name)+' Subtotal</td><td style="border:1px solid #ccc;text-align:right;font-weight:bold;background:#fafafa;">'+(s.amt!==null?money(s.amt):"—")+'</td></tr>';
+  });
+  h+='<tr><td style="border:1px solid #999;text-align:center;font-weight:bold;background:#efe3e7;">'+c.grandQty+'</td><td style="border:1px solid #999;font-weight:bold;background:#efe3e7;">GRAND TOTAL</td><td style="border:1px solid #999;text-align:right;font-weight:bold;background:#efe3e7;">'+money(c.grandAmt)+'</td></tr>';
+  h+='</table>';
+  const notes=$("fNotes").value.trim();
+  if(notes)h+='<p style="font-size:13px;"><b>Notes:</b> '+esc(notes)+'</p>';
+  h+='<p style="font-size:11px;color:#888;">Confidential — For Internal Use Only</p></div>';
+  return h;
+}
+
+function showToast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+async function copyBoth(html,plain){
+  try{
+    const item=new ClipboardItem({
+      "text/html":new Blob([html],{type:"text/html"}),
+      "text/plain":new Blob([plain],{type:"text/plain"})
+    });
+    await navigator.clipboard.write([item]);showToast("Copied ✓");
+  }catch(e){
+    try{await navigator.clipboard.writeText(plain);showToast("Copied ✓");}
+    catch(e2){showToast("Copy failed — long-press the preview to copy");}
+  }
+}
+let lastHTML="",lastPlain="";
+$("copyBtn").addEventListener("click",()=>{
+  const c=collect();
+  if(!c.sections.length){alert("Nothing counted yet. Add quantities first.");return;}
+  lastHTML=buildHTML(c);lastPlain=buildPlain(c);
+  $("outView").innerHTML=lastHTML;
+  copyBoth(lastHTML,lastPlain);
+  $("dlg").showModal();
+});
+$("dlgCopyEmail").addEventListener("click",()=>copyBoth(lastHTML,lastPlain));
+$("dlgCopyText").addEventListener("click",()=>{
+  navigator.clipboard.writeText(lastPlain).then(()=>showToast("Text copied ✓")).catch(()=>showToast("Copy failed"));
+});
+$("dlgClose").addEventListener("click",()=>$("dlg").close());
+$("dlgX").addEventListener("click",()=>$("dlg").close());
+$("resetBtn").addEventListener("click",()=>{
+  if(!confirm("Reset all counts and event details?"))return;
+  Object.values(qtyOf).forEach(o=>o.inp.value=0);
+  FIELDS.forEach(f=>{$(f).value=f==="fTier"?"20":"";});
+  $("fDate").value=new Date().toISOString().slice(0,10);
+  try{localStorage.removeItem(KEY);}catch(e){}
+  refresh();
+});
+load();
+</script>
+</body>
+</html>
